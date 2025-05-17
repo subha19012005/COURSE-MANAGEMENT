@@ -1,0 +1,95 @@
+
+import javax.swing.*;
+import java.awt.*;
+import java.sql.*;
+import db.DBConnection;
+import java.awt.event.*;
+
+public class StudentForm extends JFrame {
+
+    JTextField nameField = new JTextField();
+    JTextField emailField = new JTextField();
+    JTextField dobField = new JTextField();
+    JTextField contactField = new JTextField();
+    JComboBox<String> genderBox;
+
+    public StudentForm() {
+        setTitle("Student Registration");
+        setSize(400, 350);
+        setLayout(new GridLayout(7, 2, 10, 10));
+
+        add(new Label("Name:"));
+        add(nameField);
+
+        add(new Label("Email:"));
+        add(emailField);
+
+        add(new Label("Date Of Birth:"));
+        add(dobField);
+
+        add(new JLabel("Gender:"));
+        genderBox = new JComboBox<>(new String[]{"Male", "Female", "Other"});
+        add(genderBox);
+
+        add(new Label("Contact:"));
+        add(contactField);
+
+        JButton registerBtn = new JButton("Register");
+        add(registerBtn);
+
+        JButton backBtn = new JButton("Back");
+        add(backBtn);
+
+        registerBtn.addActionListener(e -> registerStudent());
+        backBtn.addActionListener(e
+                -> {
+            dispose();
+        });
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        setVisible(true);
+    }
+
+    private void registerStudent() {
+        String name = nameField.getText();
+        String email = emailField.getText();
+        String dob = dobField.getText();
+        String gender = genderBox.getSelectedItem().toString();
+        String contact = contactField.getText();
+
+        String sql = "INSERT INTO Students (name, email, dob, gender, contact) values (?, ?, ?, ?, ?)";
+
+        try (Connection conn = DBConnection.getConnection()) {
+            PreparedStatement ps = conn.prepareStatement(sql);
+
+            ps.setString(1, name);
+            ps.setString(2, email);
+            ps.setString(3, dob);
+            ps.setString(4, gender);
+            ps.setString(5, contact);
+
+            ps.executeUpdate();
+            JOptionPane.showMessageDialog(this, "Registration is successfull");
+            clearFields();
+            new Courses();
+            this.dispose();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    private void clearFields() {
+
+        nameField.setText("");
+        emailField.setText("");
+        dobField.setText("");
+        contactField.setText("");
+        genderBox.setSelectedIndex(0);
+    }
+
+    public static void main(String[] args) {
+        new StudentForm();
+    }
+
+}
