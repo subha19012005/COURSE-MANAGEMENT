@@ -1,0 +1,88 @@
+import javax.swing.*;
+import java.awt.event.*;
+import java.awt.*;
+import java.sql.*;
+import db.DBConnection;
+
+public class Courses extends JFrame {
+
+    
+    JComboBox<String>  coursename;
+    JTextField coursecode = new JTextField();
+    JTextField credits = new JTextField();
+    JTextField instructor = new JTextField();
+
+    public Courses() {
+        setTitle("Course Registration:");
+        setSize(400, 300);
+        setLayout(new GridLayout(7, 4, 10, 10));
+
+        
+
+        add(new JLabel("Course Name:"));
+       coursename= new JComboBox<>(new String[]{"Computer Science","Maths","Biology","English"});
+        add(coursename);
+        add(new JLabel("Course code:"));
+        add(coursecode);
+
+        add(new JLabel("Credits:"));
+        add(credits);
+
+        add(new JLabel("Instructor:"));
+        add(instructor);
+
+        JButton a = new JButton("Save");
+        a.setPreferredSize(new Dimension(100, 30));
+
+        JPanel buttonpan = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        buttonpan.add(a);
+        add(buttonpan);
+        add(new JLabel());
+        a.addActionListener(e -> Courseadded());
+
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        setVisible(true);
+    }
+
+    private void Courseadded() {
+       
+        String name = coursename.getSelectedItem().toString().trim();
+         String code= coursecode.getText().trim();
+        String creditstr = credits.getText().trim();
+        String instructorName = instructor.getText().trim();
+
+        int credit = Integer.parseInt(creditstr);
+        try (Connection conn = DBConnection.getConnection()) {
+            String sql = "INSERT INTO Courses(course_name,course_code,credit,instructor) values (?, ?, ?, ?)";
+            PreparedStatement ps = conn.prepareStatement(sql);
+            
+            ps.setString(1, name);
+            ps.setString(2,code);
+            ps.setInt(3, credit);
+            ps.setString(4, instructorName);
+             ps.executeUpdate();
+
+            JOptionPane.showMessageDialog(this, "Courses added Successfully");
+            clearFields();
+            new Enrollment();
+            this.dispose();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    public void clearFields() {
+       
+        coursename.setSelectedIndex(0);
+        coursecode.setText("");
+        credits.setText("");
+        instructor.setText("");
+
+    }
+
+    public static void main(String[] args) {
+        new Courses();
+    }
+
+}
